@@ -99,6 +99,10 @@ func (t *ExportSolidityTestSuite) SetupTest() {
 	t.verifierContract = v
 	t.backend.Commit()
 
+	t.circuit.curveID = 1
+	t.circuit.Path = make([]frontend.Variable, 5)
+	t.circuit.Helper = make([]frontend.Variable, 4)
+
 	t.r1cs, err = frontend.Compile(ecc.BN254, r1cs.NewBuilder, &t.circuit)
 	t.NoError(err, "compiling R1CS failed")
 
@@ -201,6 +205,13 @@ func (t *ExportSolidityTestSuite) TestVerifyProof() {
 		// fmt.Printf("signature verification failed")
 		os.Exit(-1)
 	}
+
+	// creating circuit
+	circuit := consolidatedCircuit{
+		Path:   make([]frontend.Variable, len(proof)),
+		Helper: make([]frontend.Variable, len(proof)-1),
+	}
+	circuit.curveID = confs[0].curve
 
 	// creatin witness
 	assignment := consolidatedCircuit{
